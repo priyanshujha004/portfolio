@@ -1,6 +1,4 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# Dependencies
 /node_modules
 /.pnp
 .pnp.*
@@ -10,32 +8,80 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
-
-# next.js
+# Next.js & Turbopack build outputs
 /.next/
 /out/
-
-# production
 /build
+/dist
+.turbo
 
-# misc
-.DS_Store
-*.pem
+# Testing & Coverage
+/coverage
+*.lcov
+.nyc_output
 
-# debug
+# Environment files
+.env*
+!.env.example
+
+# TypeScript & Linter Caches
+*.tsbuildinfo
+next-env.d.ts
+.eslintcache
+.prettiercache
+.stylelintcache
+
+# Vercel
+.vercel
+
+# Debug & Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+lerna-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# OS & System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+*.pem
 
-# vercel
-.vercel
+# IDEs & Code Editors
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+*.sublime-project
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*~
+.zed
+.cursor
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# AI Tooling & Local Agent Instructions
+CLAUDE.md
+AGENTS.md
+.agents/
+.claude/
+.gemini/
+
+# Internal Documentation & Checklists
+docs/
+
+# Temporary files
+tmp/
+temp/
