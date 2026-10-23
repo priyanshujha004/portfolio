@@ -15,7 +15,7 @@ const lexend = Lexend({
 export const metadata = {
   metadataBase: new URL("https://priyanshujha.dev"),
   title: {
-    default: `${profile.name} · ${profile.role}`,
+    default: "iamprynshu",
     template: `%s · ${profile.name}`,
   },
   description: profile.bio,

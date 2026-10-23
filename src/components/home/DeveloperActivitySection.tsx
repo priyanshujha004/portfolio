@@ -7,13 +7,14 @@ const MONTH_ABBR = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
+const HEATMAP_START_DATE = "2024-12-01";
 
 interface MonthMark {
   weekIndex: number;
   label: string;
+  span: number;
 }
 
-/** Derive month labels from the actual first date of each week. */
 function getMonthMarks(firstDates: string[]): MonthMark[] {
   const marks: MonthMark[] = [];
   let previousMonth = -1;
@@ -28,16 +29,29 @@ function getMonthMarks(firstDates: string[]): MonthMark[] {
     const month = date.getMonth();
 
     if (month !== previousMonth) {
+      if (marks.length > 0) {
+        const previousMark = marks[marks.length - 1];
+        previousMark.span = i - previousMark.weekIndex;
+      }
+
       marks.push({
         weekIndex: i,
         label: MONTH_ABBR[month],
+        span: 1,
       });
+
       previousMonth = month;
     }
   }
 
+  if (marks.length > 0) {
+    const lastMark = marks[marks.length - 1];
+    lastMark.span = firstDates.length - lastMark.weekIndex;
+  }
+
   return marks;
 }
+
 
 /**
  * Avoid displaying adjacent month labels too close together.
@@ -67,23 +81,50 @@ export function DeveloperActivitySection({ stats }: Props) {
   const codingStats = stats.coding;
   const ghStats = stats.github;
 
+  const codingWeeks = useMemo(
+    () =>
+      codingStats.weeks
+        .map((week) => ({
+          ...week,
+          days: week.days.filter(
+            (day) => day.date >= HEATMAP_START_DATE
+          ),
+        }))
+        .filter((week) => week.days.length > 0),
+    [codingStats.weeks]
+  );
+
+  const githubWeeks = useMemo(
+    () =>
+      ghStats.weeks
+        .map((week) => ({
+          ...week,
+          contributionDays: week.contributionDays.filter(
+            (day) => day.date >= HEATMAP_START_DATE
+          ),
+        }))
+        .filter((week) => week.contributionDays.length > 0),
+    [ghStats.weeks]
+  );
+
   const codingMonths = useMemo(
     () =>
       getMonthMarks(
-        codingStats.weeks.map((week) => week.days[0]?.date ?? "")
+        codingWeeks.map((week) => week.days[0]?.date ?? "")
       ),
-    [codingStats.weeks]
+    [codingWeeks]
   );
 
   const githubMonths = useMemo(
     () =>
       getMonthMarks(
-        ghStats.weeks.map(
+        githubWeeks.map(
           (week) => week.contributionDays[0]?.date ?? ""
         )
       ),
-    [ghStats.weeks]
+    [githubWeeks]
   );
+
 
   const activeMonths =
     activeTab === "coding" ? codingMonths : githubMonths;
@@ -130,8 +171,8 @@ export function DeveloperActivitySection({ stats }: Props) {
             type="button"
             onClick={() => setActiveTab("coding")}
             className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${activeTab === "coding"
-                ? "bg-white !text-black"
-                : "text-[#A3A3A3] hover:text-white"
+              ? "bg-white !text-black"
+              : "text-[#A3A3A3] hover:text-white"
               }`}
           >
             Coding Platforms
@@ -141,8 +182,8 @@ export function DeveloperActivitySection({ stats }: Props) {
             type="button"
             onClick={() => setActiveTab("github")}
             className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${activeTab === "github"
-                ? "bg-white !text-black"
-                : "text-[#A3A3A3] hover:text-white"
+              ? "bg-white !text-black"
+              : "text-[#A3A3A3] hover:text-white"
               }`}
           >
             GitHub Activity
@@ -158,7 +199,7 @@ export function DeveloperActivitySection({ stats }: Props) {
         >
           <div className="flex gap-[2px]">
             {activeTab === "coding"
-              ? codingStats.weeks.map((week, weekIndex) => {
+              ? codingWeeks.map((week, weekIndex) => {
                 const markIndex = activeMonths.findIndex(
                   (month) => month.weekIndex === weekIndex
                 );
@@ -169,27 +210,36 @@ export function DeveloperActivitySection({ stats }: Props) {
                   <div
                     key={weekIndex}
                     className="flex shrink-0 flex-col"
-                    style={{ width: "9px" }}
+                    style={{
+                      width: "9px",
+                      marginLeft: mark && weekIndex > 0 ? "3px" : "0px",
+                    }}
                   >
-                    <div className="mb-1 h-3.5 overflow-visible whitespace-nowrap font-mono text-[10px] leading-none text-[#A3A3A3]">
-                      {mark &&
-                        shouldShowMonthLabel(activeMonths, markIndex)
-                        ? mark.label
-                        : ""}
+                    <div className="relative mb-1 h-3.5">
+                      {mark && (
+                        <span
+                          className="absolute top-0 whitespace-nowrap font-mono text-[10px] leading-none text-[#A3A3A3]"
+                          style={{
+                            left: `${(mark.span * 11 - 2) / 2}px`,
+                            transform: "translateX(-50%)",
+                          }}
+                        >
+                          {mark.label}
+                        </span>
+                      )}
                     </div>
-
                     <div className="flex flex-col gap-[2px]">
                       {week.days.map((day, dayIndex) => {
-                        let background = "bg-[#141414]";
+                        let background = "bg-[#161B22]";
 
                         if (day.intensity === 1) {
-                          background = "bg-[#2A2A2A]";
+                          background = "bg-[#0E4429]";
                         } else if (day.intensity === 2) {
-                          background = "bg-[#555555]";
+                          background = "bg-[#006D32]";
                         } else if (day.intensity === 3) {
-                          background = "bg-[#999999]";
+                          background = "bg-[#26A641]";
                         } else if (day.intensity === 4) {
-                          background = "bg-white";
+                          background = "bg-[#39D353]";
                         }
 
                         return (
@@ -205,7 +255,7 @@ export function DeveloperActivitySection({ stats }: Props) {
                   </div>
                 );
               })
-              : ghStats.weeks.map((week, weekIndex) => {
+              : githubWeeks.map((week, weekIndex) => {
                 const markIndex = activeMonths.findIndex(
                   (month) => month.weekIndex === weekIndex
                 );
@@ -216,28 +266,37 @@ export function DeveloperActivitySection({ stats }: Props) {
                   <div
                     key={weekIndex}
                     className="flex shrink-0 flex-col"
-                    style={{ width: "9px" }}
+                    style={{
+                      width: "9px",
+                      marginLeft: mark && weekIndex > 0 ? "3px" : "0px",
+                    }}
                   >
-                    <div className="mb-1 h-3.5 overflow-visible whitespace-nowrap font-mono text-[10px] leading-none text-[#A3A3A3]">
-                      {mark &&
-                        shouldShowMonthLabel(activeMonths, markIndex)
-                        ? mark.label
-                        : ""}
+                    <div className="relative mb-1 h-3.5">
+                      {mark && (
+                        <span
+                          className="absolute top-0 whitespace-nowrap font-mono text-[10px] leading-none text-[#A3A3A3]"
+                          style={{
+                            left: `${(mark.span * 11 - 2) / 2}px`,
+                            transform: "translateX(-50%)",
+                          }}
+                        >
+                          {mark.label}
+                        </span>
+                      )}
                     </div>
-
                     <div className="flex flex-col gap-[2px]">
                       {week.contributionDays.map((day, dayIndex) => {
                         const count = day.contributionCount;
-                        let background = "bg-[#141414]";
+                        let background = "bg-[#161B22]";
 
                         if (count === 1) {
-                          background = "bg-[#2A2A2A]";
+                          background = "bg-[#0E4429]";
                         } else if (count <= 3 && count > 1) {
-                          background = "bg-[#555555]";
+                          background = "bg-[#006D32]";
                         } else if (count <= 6 && count > 3) {
-                          background = "bg-[#999999]";
+                          background = "bg-[#26A641]";
                         } else if (count > 6) {
-                          background = "bg-white";
+                          background = "bg-[#39D353]";
                         }
 
                         return (

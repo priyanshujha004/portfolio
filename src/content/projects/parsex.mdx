@@ -8,71 +8,17 @@ status: "Open Source Engine"
 stack: ["Python", "FastAPI", "NLP", "Spacy", "Regex", "Docker"]
 architecture: "Document conversion pipeline converting raw PDFs/DOCX into normalized JSON trees, evaluated against configurable job competency vectors."
 metrics:
-  - label: "Extraction F1"
-    value: "92.4%"
-  - label: "Parse Throughput"
-    value: "< 210ms / resume"
-  - label: "Field Extraction"
-    value: "14 Core Entities"
-  - label: "Ranking Determinism"
-    value: "100% Explainable"
+  - label: "NULL"
+    value: "NULL"
+  - label: "NULL"
+    value: "NULL"
+  - label: "NULL"
+    value: "NULL"
+  - label: "NULL"
+    value: "NULL"
 image: "/images/projects/parsex.jpg"
 repoUrl: "https://github.com/priyanshujha004/ParseX"
 featured: false
 ---
 
-### Project Overview
-ParseX is an automated resume intelligence engine built to streamline technical hiring workflows. It transforms unstructured resumes across diverse layouts (single-column, multi-column, PDF, DOCX) into clean, validated JSON entities and scores candidates against specific job role skill matrices.
-
-By providing explainable, transparent candidate match breakdowns (e.g., Python: 98%, Cloud Computing: 95%, ML: 92%), ParseX helps recruitment teams identify top technical talent without relying on opaque, unexplainable black-box screening tools.
-
-### Motivation & Problem
-Recruitment pipelines often receive hundreds of applications per opening. Existing ATS (Applicant Tracking Systems) suffer from:
-1. **Layout Fragility:** Multi-column designs, tables, and creative typography frequently break traditional PDF text scrapers, causing candidate education or work experience blocks to scramble.
-2. **Opaque Scoring:** Many commercial resume filters use proprietary algorithms that reject qualified candidates due to missing arbitrary keywords without providing explainable feedback.
-
-ParseX addresses this by combining geometric layout parsing with structured entity recognition and transparent, deterministic competency weighting.
-
-### My Role & Contribution
-Sole engineer and open-source author:
-- **Built the Extraction Pipeline:** Implemented text layout extraction preserving relative bounding-box proximity to reconstruct multi-column reading orders accurately.
-- **Developed Entity Extraction Models:** Created rule-assisted Named Entity Recognition (NER) models to extract candidates' contact data, university credentials, employment timelines, and technical skill graphs.
-- **Engineered Candidate Ranking Matrix:** Implemented weighted cosine similarity matching between parsed candidate skill vectors and target role requirement profiles.
-- **Published as RESTful Microservice:** Packaged the engine using FastAPI with asynchronous batch endpoints and containerized Docker images.
-
-### Technical Architecture & Data Flow
-
-```text
-[ Uploaded Document (PDF / DOCX) ]
-        │
-        ▼
-[ Document Geometry Normalizer ] (Detects multi-column splits & bounding boxes)
-        │
-        ▼
-[ Entity Extraction Engine ]
-   ├── Contact Parser (Email, Phone, LinkedIn, GitHub, Location)
-   ├── Education Extractor (Degrees, Institutions, Graduation Years)
-   ├── Experience Segmenter (Company, Title, Duration, Impact Bullets)
-   └── Technical Skills Recognizer (1,200+ normalized tech taxonomy)
-        │
-        ▼
-[ JSON Parse Tree Generator ] (Produces validated schema)
-        │
-        ▼
-[ Profile Matching Matrix ] (Computes weighted competency alignment vs Job Vector)
-```
-
-### Key Engineering Decisions & Trade-Offs
-
-#### 1. Hybrid Rule-Heuristics + NER vs. Pure LLM Parsing
-- **Decision:** Utilized deterministic regex and NLP tokenizers for structured fields (dates, emails, URLs) and NER for unstructured contextual entities, rather than sending entire resumes to external LLM APIs.
-- **Outcome:** Reduced parsing cost to $0.00, decreased latency to under 210ms per resume, and ensured complete data privacy with no candidate PII leaked to external third parties.
-
-#### 2. Explainable Competency Scoring
-- **Decision:** Designed a transparent matrix scoring formula where each match is backed by direct text evidence and highlighted keywords.
-- **Outcome:** Eliminates algorithmic bias and allows hiring engineers to verify exactly why a candidate received a given suitability rating.
-
-### Implementation Status & Outcomes
-- Core repository available at [github.com/priyanshujha004/ParseX](https://github.com/priyanshujha004/ParseX).
-- Benchmarked against diverse technical resumes with over 92% entity extraction F1 score.
-- Ready for integration with downstream applicant pipelines.
+COMING SOON
