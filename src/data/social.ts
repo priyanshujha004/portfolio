@@ -1,42 +1,45 @@
-import { Mail, FileText, type LucideIcon } from "lucide-react";
-import {
-  GithubIcon,
-  LinkedinIcon,
-  XIcon,
-} from "@/components/foundation/icons/BrandIcons";
-import type { ComponentType } from "react";
+import { profile } from "./profile";
 
 export interface SocialLink {
   label: string;
   href: string;
-  icon: LucideIcon | ComponentType<{ size?: number; className?: string }>;
   external?: boolean;
 }
 
 export const socialLinks: SocialLink[] = [
-  { label: "Email", href: "mailto:priyanshujha19.work@gmail.com", icon: Mail },
+  {
+    label: "Email",
+    href: `mailto:${profile.email}`,
+    external: false,
+  },
   {
     label: "GitHub",
-    href: "https://github.com/priyanshujha004",
-    icon: GithubIcon,
+    href: `https://github.com/${profile.githubUsername}`,
     external: true,
   },
   {
     label: "LinkedIn",
-    href: "https://www.linkedin.com/in/priyanshujha971/",
-    icon: LinkedinIcon,
+    href: `https://www.linkedin.com/in/${profile.linkedinUsername}/`,
     external: true,
   },
   {
-    label: "Codolio",
-    href: "https://codolio.com/profile/hnhwXBWI",
-    icon: XIcon,
+    label: "LeetCode",
+    href: `https://leetcode.com/u/${profile.leetcodeUsername}/`,
+    external: true,
+  },
+  {
+    label: "CodeChef",
+    href: `https://www.codechef.com/users/${profile.codechefUsername}`,
+    external: true,
+  },
+  {
+    label: "HackerRank",
+    href: `https://www.hackerrank.com/profile/${profile.hackerrankUsername}`,
     external: true,
   },
   {
     label: "Resume",
-    href: "https://drive.google.com/your-resume-link",
-    icon: FileText,
-    external: true,
+    href: "/resume",
+    external: false,
   },
 ];

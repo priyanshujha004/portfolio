@@ -8,7 +8,6 @@
     "start": "next start",
     "lint": "eslint",
     "prepare": "husky",
-    "update-codolio": "node scripts/update-codolio-snapshot.mjs",
     "analyze": "ANALYZE=true next build",
     "type-check": "tsc --noEmit",
     "verify": "npm run type-check && npm run lint && npm run build"
@@ -26,6 +25,7 @@
     "next-mdx-remote": "^6.0.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-icons": "^5.7.0",
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {

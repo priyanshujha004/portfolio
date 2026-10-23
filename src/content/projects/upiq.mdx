@@ -1,19 +1,68 @@
 ---
-title: "Medora"
-order: 1
-summary: "Healthcare Appointment Platform"
-description: "A full-stack healthcare appointment booking system with real-time scheduling, patient records, and doctor availability management."
-stack: ["Next.js", "PostgreSQL", "Prisma", "Tailwind CSS"]
-architecture: "Server-rendered Next.js app with a Prisma/PostgreSQL data layer, background jobs for reminder emails, and role-based access control for patients, doctors, and admins."
+title: "UPIQ"
+order: 2
+summary: "Personal Finance Dashboard & Expense Tracking Application"
+description: "A personal finance management application with an interactive React dashboard for reviewing bank statement data, tracking expenses, and understanding spending patterns through financial analytics."
+category: "Frontend Development"
+status: "Production Deployment"
+stack: ["React", "JavaScript", "Tailwind CSS", "REST APIs"]
+architecture: "React-based frontend consuming application data through API integrations and presenting financial transactions, expense summaries, and spending analytics in an interactive dashboard."
 metrics:
-  - label: "Uptime"
-    value: "99.9%"
-  - label: "Avg Response"
-    value: "180ms"
-image: "/images/projects/medora.png"
-liveUrl: "https://medora.example.com"
-repoUrl: "https://github.com/yourusername/medora"
+  - label: "Core Focus"
+    value: "Frontend Development"
+  - label: "Data Source"
+    value: "Bank Statements Documents"
+  - label: "Primary Interface"
+    value: "Finance Dashboard"
+image: "/images/projects/upiq.jpeg"
+images:
+  - "/images/projects/upiq.jpeg"
+liveUrl: "https://upiq.vercel.app"
+repoUrl: "https://github.com/yourxharsh19/UPIQ-PROD"
 featured: true
 ---
 
-Full case-study body content goes here — this renders on the `/projects/medora` detail page in a later phase.
+### Project Overview
+
+UPIQ is a personal finance management application designed to make expense tracking more convenient and accessible. It enables users to work with bank statement PDFs and review their financial activity through a centralized dashboard.
+
+The application focuses on transforming transaction data into a more understandable financial overview, helping users examine expenses, identify spending patterns, and monitor their money without manually recording every transaction.
+
+### Motivation & Problem
+
+Tracking personal finances manually can be tedious, particularly when transactions are spread across monthly bank statements. Conventional workflows often require users to enter expenses individually or connect sensitive banking credentials to external financial aggregation services.
+
+UPIQ explores a statement-based alternative: users provide their bank statement PDFs and use the application to review the resulting financial data.
+
+The frontend experience centers on two challenges:
+
+1. **Making Financial Data Understandable:** Raw transaction records are difficult to interpret at a glance. A structured dashboard helps users review expenses and identify spending patterns more easily.
+2. **Simplifying Expense Tracking:** Users need a convenient way to navigate transaction records and financial summaries without relying on manual bookkeeping.
+
+### My Role & Contribution
+
+As a React frontend contributor on a collaborative project with Harsh, I focused on the user-facing application experience.
+
+- **Developed the React Frontend:** Contributed to the interface and component structure for the personal finance application.
+- **Built Financial Dashboard Experiences:** Worked on presenting financial information in a structured interface that supports expense review and spending analysis.
+- **Integrated Application Data:** Contributed to connecting frontend views with application data and backend functionality.
+- **Improved Data Presentation:** Focused on making transaction information, expense summaries, and financial insights easier for users to navigate and understand.
+
+### Technical Architecture & Data Flow
+
+```text
+[ User ]
+    │
+    ▼
+[ React Frontend ]
+    │
+    ├── Financial Dashboard
+    ├── Transaction Views
+    ├── Expense Summaries
+    └── Spending Analytics
+    │
+    ▼
+[ Application API ]
+    │
+    ├── Statement Processing
+    ├── Transaction

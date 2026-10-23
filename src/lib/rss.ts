@@ -18,8 +18,8 @@ export function generateRssFeed() {
   posts.forEach((post) => {
     feed.addItem({
       title: post.title,
-      id: `${siteUrl}/blog/${post.slug}`,
-      link: `${siteUrl}/blog/${post.slug}`,
+      id: `${siteUrl}/blogs/${post.slug}`,
+      link: `${siteUrl}/blogs/${post.slug}`,
       description: post.excerpt,
       date: new Date(post.date),
     });

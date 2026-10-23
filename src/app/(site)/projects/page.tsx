@@ -1,20 +1,14 @@
 import { getAllProjects } from "@/lib/mdx";
-import { ProjectsHero } from "@/sections/projects/ProjectsHero";
-import { ProjectsList } from "@/sections/projects/ProjectsList";
-import { Section } from "@/components/foundation/Section";
+import { ProjectsDirectory } from "@/components/projects/ProjectsDirectory";
+import { profile } from "@/data/profile";
 
 export const metadata = {
-  title: "Projects — Priyanshu Jha",
-  description: "A collection of systems designed, built, and shipped.",
+  title: "Projects",
+  description: `Production systems, open-source software, and distributed architectures built by ${profile.name}.`,
 };
 
 export default function ProjectsPage() {
   const projects = getAllProjects();
 
-  return (
-    <Section>
-      <ProjectsHero />
-      <ProjectsList projects={projects} />
-    </Section>
-  );
+  return <ProjectsDirectory initialProjects={projects} />;
 }

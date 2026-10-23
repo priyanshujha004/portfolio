@@ -1,19 +1,90 @@
 ---
 title: "Medora"
 order: 1
-summary: "Healthcare Appointment Platform"
-description: "A full-stack healthcare appointment booking system with real-time scheduling, patient records, and doctor availability management."
-stack: ["Next.js", "PostgreSQL", "Prisma", "Tailwind CSS"]
-architecture: "Server-rendered Next.js app with a Prisma/PostgreSQL data layer, background jobs for reminder emails, and role-based access control for patients, doctors, and admins."
+summary: "Full-Stack Healthcare Appointment Booking Platform"
+description: "A healthcare appointment management platform featuring doctor discovery, slot booking, role-based dashboards, and secure appointment lifecycle management."
+category: "Full Stack"
+status: "Production Deployment"
+stack: ["React", "Node.js", "Express", "PostgreSQL", "Prisma", "JWT"]
+architecture: "React frontend with a Node.js and Express API, PostgreSQL persistence through Prisma ORM, and JWT-based authentication using secure cookies. Database transactions help prevent conflicting appointment bookings."
 metrics:
-  - label: "Uptime"
-    value: "99.9%"
-  - label: "Avg Response"
-    value: "180ms"
-image: "/images/projects/medora.png"
-liveUrl: "https://medora.example.com"
-repoUrl: "https://github.com/yourusername/medora"
+  - label: "Booking Workflow"
+    value: "3 Steps"
+  - label: "Protected Endpoints"
+    value: "12+"
+  - label: "User Dashboards"
+    value: "2"
+  - label: "Booking Conflicts"
+    value: "Protected"
+image: "/images/projects/medora.jpeg"
+images:
+  - "/images/projects/medora.jpeg"
+liveUrl: "https://healthcare-medora.vercel.app/"
+repoUrl: "https://github.com/priyanshujha004/medora"
 featured: true
 ---
 
-Full case-study body content goes here — this renders on the `/projects/medora` detail page in a later phase.
+### Project Overview
+
+Medora is a full-stack healthcare appointment booking platform that connects patients and doctors through a centralized scheduling workflow. It enables patients to discover doctors, review availability, book appointments, and track their appointment history, while doctors manage availability and handle incoming appointment requests through a dedicated dashboard.
+
+The platform supports appointment statuses including `PENDING`, `APPROVED`, `RESCHEDULED`, `REJECTED`, and `COMPLETED`, providing a structured lifecycle from booking request to completion.
+
+### Motivation & Problem
+
+Traditional clinic scheduling can involve unnecessary coordination between patients and medical staff. Patients may need to contact clinics to check doctor availability, while doctors need a consistent way to manage appointment requests and schedules.
+
+Medora addresses these challenges through two core capabilities:
+
+1. **Simplified Appointment Booking:** Patients can discover doctors, review available slots, and submit booking requests through a streamlined online workflow.
+2. **Centralized Appointment Management:** Dedicated patient and doctor dashboards bring booking history, availability management, and appointment status updates into one platform.
+
+The result is a more organized scheduling process with less manual coordination and transaction-protected booking operations.
+
+### My Role & Contribution
+
+As the full-stack developer, I designed and implemented the core application workflow across the frontend, backend, authentication, and database layers.
+
+- **Designed the Database Models:** Structured PostgreSQL data models using Prisma ORM for users, patient profiles, doctor profiles, and availability slots.
+- **Implemented Appointment Booking:** Developed the booking workflow with database transactions to help prevent conflicting reservations when multiple requests target the same availability slot.
+- **Built Authentication & Authorization:** Implemented JWT-based authentication using secure cookies and protected API endpoints for authenticated application workflows.
+- **Developed Role-Based Dashboards:** Created separate patient and doctor experiences for booking appointments, viewing appointment history, managing availability, and processing appointment requests.
+- **Implemented Appointment Lifecycle Management:** Added support for approving, rejecting, rescheduling, and completing appointments.
+- **Built Doctor Discovery:** Implemented doctor search, filtering, and profile viewing to help patients find suitable healthcare providers.
+
+### Technical Architecture & Data Flow
+
+```text
+[ Patient / Doctor Browser ]
+             │
+             ▼
+[ React Frontend ]
+             │
+             ▼
+[ Node.js + Express API ]
+             │
+             ├── Authentication & Authorization
+             ├── Doctor Search & Availability
+             ├── Appointment Booking
+             └── Appointment Lifecycle Management
+             │
+             ▼
+[ Prisma ORM ]
+             │
+             ▼
+[ PostgreSQL Database ]
+             │
+             └── Transaction-Protected Booking Operations
+```
+
+### Key Engineering Decisions & Trade-Offs
+
+#### 1. Database Transactions for Appointment Booking
+
+- **Decision:** Used database transactions around booking operations to maintain consistency when appointments are requested.
+- **Rationale:** Appointment scheduling requires reliable handling of availability and booking state. Transactional operations help prevent conflicting reservations and ensure related database changes are handled together.
+- **Outcome:** Booking logic is structured around database consistency rather than relying solely on frontend availability checks.
+
+#### 2. JWT Authentication with Secure Cookies
+
+- **Decision:** Used JWT-based authentication with secure cookies for

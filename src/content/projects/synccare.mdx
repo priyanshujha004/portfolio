@@ -1,0 +1,230 @@
+---
+title: "SyncCare"
+order: 3
+summary: "AI-Powered Disease Prediction & Healthcare Assistance Platform"
+description: "An end-to-end healthcare project combining symptom-based disease prediction with planned medical RAG assistance, prescription OCR, patient records, appointment management, and healthcare reminders."
+category: "AI & Machine Learning"
+status: "Research & Development"
+stack: ["Python", "Machine Learning", "Random Forest", "React", "Node.js", "Express.js", "Prisma ORM", "MySQL", "NLP", "OCR"]
+architecture: "A modular healthcare architecture designed around a Random Forest disease prediction model, a planned retrieval-augmented medical assistant, prescription OCR, and patient and doctor workflows backed by a shared database."
+metrics: []
+image: "/images/projects/synccare.jpg"
+images:
+  - "/images/projects/synccare.jpg"
+repoUrl: "https://github.com/priyanshujha004/synccare"
+featured: true
+---
+
+### Project Overview
+
+SyncCare is an end-to-end healthcare system I am building independently to explore how machine learning, medical information retrieval, document processing, and full-stack development can work together in a unified application.
+
+The project is designed around four major capabilities: symptom-based disease prediction, a retrieval-augmented healthcare assistant, prescription image processing, and patient-doctor healthcare management.
+
+The current implementation milestone is the **Random Forest disease prediction model**. The remaining modules—including natural language processing, medical knowledge retrieval, prescription OCR, and application-wide integration—are planned development stages rather than completed features.
+
+The long-term objective is to bring preliminary disease prediction, contextual healthcare information, and everyday medical record management into a single application while maintaining clear boundaries between AI-generated information and professional medical diagnosis.
+
+### Motivation & Problem
+
+Healthcare information and personal medical workflows are often distributed across different tools. Patients may need separate systems for tracking symptoms, reviewing medical information, storing prescriptions, managing appointments, and remembering medication schedules.
+
+At the same time, machine learning predictions alone provide limited value when they are not accompanied by clear context, appropriate uncertainty, and access to relevant supporting information.
+
+SyncCare aims to explore these challenges through three connected areas:
+
+1. **Preliminary Disease Prediction:** Use structured symptom and age inputs to predict a possible disease with a trained machine learning classifier.
+2. **Contextual Healthcare Assistance:** Develop an NLP and retrieval-augmented generation pipeline that can retrieve relevant healthcare information and use that context to answer health-related questions.
+3. **Centralized Healthcare Management:** Build patient and doctor workflows for medical records, appointments, prescription information, and reminders.
+
+The system is being developed incrementally, beginning with the machine learning component before the supporting AI modules and application workflows are integrated.
+
+### My Role & Contribution
+
+As the sole researcher and developer, I am responsible for the complete project, from dataset preparation and model training to the planned application architecture and module integration.
+
+- **Medical Dataset Preparation:** Work with symptom-disease data, inspect the available features, and prepare structured inputs for machine learning.
+- **Random Forest Model Training:** Implement and train a Random Forest classifier for symptom-based disease prediction using symptom indicators and age-related input features.
+- **Model Evaluation:** Establish an evaluation workflow for measuring classification performance. Verified numerical results will be added after the evaluation metrics have been finalized.
+- **Healthcare RAG Design:** Plan a retrieval-augmented medical assistant that will process health-related questions, retrieve relevant reference material, and generate context-informed responses.
+- **Prescription OCR Design:** Plan an image-processing pipeline to extract text from prescription images and organize the extracted information for subsequent review.
+- **Full-Stack System Design:** Define the application architecture connecting the frontend, backend, machine learning components, document storage, and relational database.
+- **Healthcare Workflow Planning:** Design patient and doctor workflows covering profiles, medical records, appointments, prescriptions, and reminders.
+
+### Current Implementation Status
+
+SyncCare is being developed in stages. The current status of each major component is outlined below.
+
+| Component | Status | Scope |
+|---|---|---|
+| Dataset preparation | Implemented for current ML workflow | Prepare symptom-disease data for model training |
+| Random Forest training | Completed | Train the initial disease prediction classifier |
+| ML evaluation and statistics | In progress | Consolidate verified metrics and document results |
+| Medical NLP and RAG | Planned | Retrieve relevant medical information and generate context-grounded responses |
+| Prescription OCR | Planned | Extract and process text from prescription images |
+| Patient and doctor modules | Planned | Profiles, medical records, and appointment workflows |
+| Prescription management and reminders | Planned | Organize prescription information and planned reminders |
+| Full-stack integration | Planned | Connect frontend, backend, ML inference, and persistence |
+
+### Technical Architecture & Data Flow
+
+The planned system consists of a shared application layer and specialized healthcare modules. The following diagram describes the intended architecture; it does not imply that every component has already been implemented.
+
+```text
+[ Patient / Doctor ]
+         |
+         v
+[ React Frontend ]
+         |
+         v
+[ Node.js + Express Backend ]
+         |
+         +----------------------+----------------------+
+         |                      |                      |
+         v                      v                      v
+[ Disease Prediction ]    [ Medical RAG ]      [ Prescription OCR ]
+[ Random Forest ]         [ NLP + Retrieval ] [ Image Processing ]
+         |                      |                      |
+         +----------------------+----------------------+
+                                |
+                                v
+                     [ Healthcare Workflows ]
+                     - Patient records
+                     - Appointments
+                     - Prescriptions
+                     - Reminders
+                                |
+                                v
+                       [ Prisma ORM ]
+                                |
+                                v
+                           [ MySQL ]
+
+[ Prescription Images ]
+         |
+         v
+[ Planned Cloudinary Storage ]
+```
+
+### Disease Prediction Module
+
+The disease prediction module is the first completed model-development milestone in SyncCare.
+
+#### Model Approach
+
+- **Algorithm:** Random Forest classifier.
+- **Input:** Structured symptom indicators and age-related features.
+- **Task:** Predict a disease label from the available input features.
+- **Workflow:** Dataset preparation, feature processing, model training, and evaluation.
+
+Random Forest provides a practical baseline for structured classification tasks. Its performance depends on dataset quality, class distribution, feature representation, and the evaluation methodology.
+
+#### Evaluation Plan
+
+The model's performance will be documented using suitable classification metrics, including:
+
+- Accuracy
+- Precision
+- Recall
+- F1-score
+- Confusion matrix and per-class performance, where appropriate
+
+Quantitative results will be added after the final evaluation figures are verified. No diagnostic accuracy or clinical effectiveness is claimed at this stage.
+
+### Planned Module: RAG-Based Healthcare Assistance
+
+The healthcare assistant is planned as a retrieval-augmented generation system for answering health-related questions using relevant reference material.
+
+The intended workflow is:
+
+1. Accept a user's health-related question.
+2. Normalize and prepare the query.
+3. Retrieve relevant documents from a curated healthcare knowledge base.
+4. Supply the retrieved context to a language model.
+5. Generate a response grounded in the available context.
+6. Present supporting references when reliable source metadata is available.
+
+This module is intended to improve the traceability of healthcare information. Retrieval alone cannot guarantee medical correctness, and the assistant will need safeguards against unsupported claims and misleading responses.
+
+### Planned Module: Prescription OCR
+
+The prescription-processing module is intended to convert uploaded prescription images into text that can be reviewed and organized within the application.
+
+The planned pipeline includes:
+
+1. Upload a prescription image through the application.
+2. Store the image and obtain its reference URL.
+3. Apply image preprocessing, such as resizing and noise reduction where appropriate.
+4. Run OCR to extract text.
+5. Process the extracted text to identify potential medication names, dosages, frequencies, and instructions.
+6. Present extracted information for verification before it is used in healthcare records.
+
+Handwritten prescriptions can be difficult to interpret reliably. Extracted medication information will require human verification and must not be treated as automatically validated medical instructions.
+
+### Planned Module: Healthcare Management
+
+SyncCare is intended to support separate patient and doctor experiences within the same application.
+
+**Patient workflows**
+
+- Manage profile information.
+- View medical history and health records.
+- Book appointments.
+- Upload and review prescriptions.
+- Set medication reminders.
+- Access healthcare assistance.
+
+**Doctor workflows**
+
+- View patient records where authorized.
+- Manage appointments.
+- Add and review prescription information.
+- Access consultation history.
+
+These workflows are planned capabilities and will be implemented incrementally alongside the underlying backend and database integration.
+
+### Key Engineering Decisions & Trade-Offs
+
+#### 1. Random Forest as the Initial Classification Model
+
+- **Decision:** Begin with Random Forest for structured symptom-based disease prediction.
+- **Rationale:** It provides a practical baseline for tabular classification and enables systematic evaluation before exploring more complex approaches.
+- **Trade-off:** Predictions depend on the quality and representativeness of the training dataset. Strong benchmark performance alone would not establish clinical reliability.
+
+#### 2. Retrieval-Augmented Generation for Healthcare Information
+
+- **Planned decision:** Separate document retrieval from language generation.
+- **Rationale:** Retrieving relevant reference material can make answers easier to inspect and verify than relying exclusively on an LLM's pretrained knowledge.
+- **Trade-off:** The quality of the final answer depends on retrieval relevance, source quality, model behavior, and correct attribution. RAG does not eliminate hallucinations.
+
+#### 3. Modular Application Architecture
+
+- **Planned decision:** Separate disease prediction, healthcare assistance, prescription processing, and healthcare management into distinct functional modules.
+- **Rationale:** Each module has different inputs, processing requirements, and evaluation criteria.
+- **Trade-off:** Integration requires consistent API contracts, data models, access controls, error handling, and validation across components.
+
+#### 4. Relational Persistence with Prisma ORM
+
+- **Planned decision:** Use Prisma ORM with MySQL for structured application data.
+- **Rationale:** Patient profiles, appointments, prescriptions, and medical records benefit from explicit relationships and consistent persistence.
+- **Trade-off:** Healthcare data requires careful authorization, privacy safeguards, and validation throughout the application.
+
+### Implementation Status & Outcomes
+
+- Source code and ongoing development are maintained in the [SyncCare GitHub repository](https://github.com/priyanshujha004/synccare).
+- Completed the initial Random Forest model training milestone.
+- Established the planned architecture for disease prediction, medical RAG, prescription OCR, and healthcare management.
+- ML evaluation statistics will be incorporated once the final figures have been verified.
+- The remaining AI modules and full-stack workflows are planned for subsequent implementation.
+
+### Limitations & Future Roadmap
+
+- **Model Evaluation:** Finalize and document the Random Forest evaluation results, including per-class performance and error analysis.
+- **Medical Knowledge Retrieval:** Implement document ingestion, retrieval, source attribution, and grounded response generation.
+- **Prescription Digitization:** Develop OCR processing and validation for extracted prescription information.
+- **Application Integration:** Connect the frontend, backend, database, and ML inference workflows.
+- **Healthcare Management:** Implement patient and doctor workflows, appointments, prescriptions, and reminders.
+- **Security and Privacy:** Apply appropriate authentication, authorization, data protection, and secure handling of sensitive healthcare information.
+- **Clinical Validation:** Evaluate model limitations and establish appropriate safeguards before considering any real-world clinical use.
+
+SyncCare is a research and development project, not a clinically validated diagnostic system. Its future AI capabilities are intended to provide informational assistance rather than replace qualified medical professionals.

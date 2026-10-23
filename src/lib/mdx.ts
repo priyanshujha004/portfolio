@@ -9,6 +9,43 @@ import type { BlogPost } from "@/types/blog";
 const blogDirectory = path.join(process.cwd(), "src/content/blog");
 const projectsDirectory = path.join(process.cwd(), "src/content/projects");
 
+function checkImageExists(imagePath?: string): boolean {
+  if (!imagePath) return false;
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return true;
+  }
+  const cleanPath = imagePath.replace(/^\//, "");
+  const fullPath = path.join(process.cwd(), "public", cleanPath);
+  return fs.existsSync(fullPath);
+}
+
+import crypto from "node:crypto";
+
+function getVersionedImagePath(imagePath?: string): string {
+  if (!imagePath) return "";
+
+  if (/^https?:\/\//.test(imagePath)) {
+    return imagePath;
+  }
+
+  const cleanPath = imagePath.replace(/^\/+/, "");
+  const fullPath = path.join(process.cwd(), "public", cleanPath);
+
+  if (!fs.existsSync(fullPath)) {
+    return imagePath;
+  }
+
+  const fileBuffer = fs.readFileSync(fullPath);
+  const hash = crypto
+    .createHash("sha256")
+    .update(fileBuffer)
+    .digest("hex")
+    .slice(0, 12);
+
+  return `${imagePath.split("?")[0]}?v=${hash}`;
+}
+
+
 export function getAllProjects(): Project[] {
   const filenames = fs
     .readdirSync(projectsDirectory)
@@ -21,7 +58,27 @@ export function getAllProjects(): Project[] {
       "utf8"
     );
     const { data } = matter(fileContents);
-    return { slug, ...(data as Omit<Project, "slug">) };
+    const projectData = data as Omit<Project, "slug">;
+    const images =
+      Array.isArray(projectData.images) && projectData.images.length > 0
+        ? projectData.images
+        : projectData.image
+          ? [projectData.image]
+          : [];
+
+    const primaryImage = images[0] || projectData.image || "";
+    const imageExists = checkImageExists(primaryImage);
+
+    const versionedImages = images.map(getVersionedImagePath);
+    const versionedPrimaryImage = getVersionedImagePath(primaryImage);
+
+    return {
+      slug,
+      ...projectData,
+      images: versionedImages,
+      image: versionedPrimaryImage,
+      imageExists,
+    };
   });
 
   return projects.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
@@ -92,5 +149,23 @@ export function getProjectBySlug(slug: string) {
     "utf8"
   );
   const { data, content } = matter(fileContents);
-  return { slug, ...(data as Omit<Project, "slug">), content };
+  const projectData = data as Omit<Project, "slug">;
+  const images =
+    Array.isArray(projectData.images) && projectData.images.length > 0
+      ? projectData.images
+      : projectData.image
+        ? [projectData.image]
+        : [];
+
+  const primaryImage = images[0] || projectData.image || "";
+  const imageExists = checkImageExists(primaryImage);
+
+  return {
+    slug,
+    ...projectData,
+    images: images.map(getVersionedImagePath),
+    image: getVersionedImagePath(primaryImage),
+    imageExists,
+    content,
+  };
 }
