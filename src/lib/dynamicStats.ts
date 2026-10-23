@@ -1,5 +1,8 @@
 import { getGithubStats, type GithubStats } from "./github";
-import { getUnifiedCodingStats, type UnifiedCodingStats } from "./codingStats";
+import {
+  getUnifiedCodingStats,
+  type UnifiedCodingStats,
+} from "./codingStats";
 import { profile } from "@/data/profile";
 
 export interface CombinedStatsPayload {
@@ -23,10 +26,10 @@ export async function getCombinedStats(): Promise<CombinedStatsPayload> {
 
   return {
     github: {
-      publicRepos: gh.totalRepositories ?? 20,
-      totalCommits: gh.totalCommitContributions ?? 267,
-      pullRequests: gh.totalPullRequestContributions ?? 14,
-      longestStreak: gh.longestStreak ?? 18,
+      publicRepos: gh.totalRepositories ?? 0,
+      totalCommits: gh.totalCommitContributions ?? 0,
+      pullRequests: gh.totalPullRequestContributions ?? 0,
+      longestStreak: gh.longestStreak ?? 0,
       isLive: Boolean(gh.isLive),
       weeks: gh.weeks,
     },

@@ -21,11 +21,12 @@ export interface GithubStats {
   isLive?: boolean;
 }
 
+// Accepts from/to so we can query multiple year-ranges for 2024-present data.
 const GRAPHQL_QUERY = `
-  query ($userName: String!) {
+  query ($userName: String!, $from: DateTime!, $to: DateTime!) {
     user(login: $userName) {
       repositories(privacy: PUBLIC) { totalCount }
-      contributionsCollection {
+      contributionsCollection(from: $from, to: $to) {
         totalCommitContributions
         totalPullRequestContributions
         contributionCalendar {
@@ -67,11 +68,11 @@ function readSnapshot(): GithubStats {
       const { longest, current } = calculateStreaks(allDays);
       return {
         weeks: json.weeks,
-        totalCommitContributions: json.totalCommitContributions ?? 267,
-        totalPullRequestContributions: json.totalPullRequestContributions ?? 14,
-        totalRepositories: json.totalRepositories ?? 20,
-        longestStreak: longest || 18,
-        currentStreak: current || 3,
+        totalCommitContributions: json.totalCommitContributions ?? 0,
+        totalPullRequestContributions: json.totalPullRequestContributions ?? 0,
+        totalRepositories: json.totalRepositories ?? 0,
+        longestStreak: longest,
+        currentStreak: current,
         isLive: false,
       };
     }
@@ -81,58 +82,136 @@ function readSnapshot(): GithubStats {
 
   return {
     weeks: [],
-    totalCommitContributions: 267,
-    totalPullRequestContributions: 14,
-    totalRepositories: 20,
-    longestStreak: 18,
-    currentStreak: 3,
+    totalCommitContributions: 0,
+    totalPullRequestContributions: 0,
+    totalRepositories: 0,
+    longestStreak: 0,
+    currentStreak: 0,
     isLive: false,
   };
+}
+
+/** Fetch a single year-range of contributions via GitHub GraphQL API. */
+async function fetchContributionRange(
+  token: string,
+  username: string,
+  from: string,
+  to: string
+): Promise<{
+  weeks: Week[];
+  totalCommitContributions: number;
+  totalPullRequestContributions: number;
+  totalRepositories: number;
+} | null> {
+  try {
+    const res = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "User-Agent": "Priyanshu-Portfolio",
+      },
+      body: JSON.stringify({
+        query: GRAPHQL_QUERY,
+        variables: { userName: username, from, to },
+      }),
+      next: { revalidate: 3600 },
+    });
+
+    if (!res.ok) return null;
+    const json = await res.json();
+    const user = json.data?.user;
+    if (!user) return null;
+
+    const collection = user.contributionsCollection;
+    return {
+      weeks: collection.contributionCalendar.weeks,
+      totalCommitContributions: collection.totalCommitContributions,
+      totalPullRequestContributions: collection.totalPullRequestContributions,
+      totalRepositories: user.repositories.totalCount,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function getGithubStats(): Promise<GithubStats> {
   const token = process.env.GITHUB_TOKEN;
   const username = process.env.GITHUB_USERNAME || profile.githubUsername;
 
-  // 1. If GITHUB_TOKEN exists, query the full GraphQL contributions API
+  // 1. If GITHUB_TOKEN exists, query yearly ranges from 2024 to present
   if (token) {
     try {
-      const res = await fetch("https://api.github.com/graphql", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-          "User-Agent": "Priyanshu-Portfolio",
-        },
-        body: JSON.stringify({ query: GRAPHQL_QUERY, variables: { userName: username } }),
-        next: { revalidate: 3600 },
-      });
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const ranges: { from: string; to: string }[] = [];
 
-      if (res.ok) {
-        const json = await res.json();
-        if (json.data?.user) {
-          const collection = json.data.user.contributionsCollection;
-          const weeks: Week[] = collection.contributionCalendar.weeks;
-          const allDays = weeks.flatMap((w) => w.contributionDays);
-          const { longest, current } = calculateStreaks(allDays);
+      for (let year = 2024; year <= currentYear; year++) {
+        ranges.push({
+          from: `${year}-01-01T00:00:00Z`,
+          to:
+            year === currentYear
+              ? now.toISOString()
+              : `${year}-12-31T23:59:59Z`,
+        });
+      }
 
-          return {
-            weeks,
-            totalCommitContributions: collection.totalCommitContributions,
-            totalPullRequestContributions: collection.totalPullRequestContributions,
-            totalRepositories: json.data.user.repositories.totalCount,
-            longestStreak: longest,
-            currentStreak: current,
-            isLive: true,
-          };
+      const results = await Promise.all(
+        ranges.map((r) =>
+          fetchContributionRange(token, username, r.from, r.to)
+        )
+      );
+
+      // Merge results — deduplicate boundary weeks by first-day date
+      const seenWeekStarts = new Set<string>();
+      const mergedWeeks: Week[] = [];
+      let totalCommits = 0;
+      let totalPRs = 0;
+      let totalRepos = 0;
+
+      for (const result of results) {
+        if (!result) continue;
+        totalCommits += result.totalCommitContributions;
+        totalPRs += result.totalPullRequestContributions;
+        totalRepos = result.totalRepositories; // same across queries
+
+        for (const week of result.weeks) {
+          const key = week.contributionDays[0]?.date;
+          if (key && !seenWeekStarts.has(key)) {
+            seenWeekStarts.add(key);
+            mergedWeeks.push(week);
+          }
         }
       }
+
+      // Sort chronologically
+      mergedWeeks.sort((a, b) =>
+        (a.contributionDays[0]?.date ?? "").localeCompare(
+          b.contributionDays[0]?.date ?? ""
+        )
+      );
+
+      const allDays = mergedWeeks.flatMap((w) => w.contributionDays);
+      const { longest, current } = calculateStreaks(allDays);
+
+      return {
+        weeks: mergedWeeks,
+        totalCommitContributions: totalCommits,
+        totalPullRequestContributions: totalPRs,
+        totalRepositories: totalRepos,
+        longestStreak: longest,
+        currentStreak: current,
+        isLive: true,
+      };
     } catch (error) {
-      console.warn("GitHub GraphQL query failed, attempting public REST API fallback:", error);
+      console.warn(
+        "GitHub multi-year GraphQL query failed, attempting fallback:",
+        error
+      );
     }
   }
 
-  // 2. Fetch live public repository count and commit search from GitHub public REST API (no auth required)
+  // 2. Fallback — snapshot + public REST API (no auth required)
   const base = readSnapshot();
   try {
     const userRes = await fetch(`https://api.github.com/users/${username}`, {
@@ -165,13 +244,19 @@ export async function getGithubStats(): Promise<GithubStats> {
 
     if (commitSearchRes.ok) {
       const commitData = await commitSearchRes.json();
-      if (typeof commitData.total_count === "number" && commitData.total_count > 0) {
+      if (
+        typeof commitData.total_count === "number" &&
+        commitData.total_count > 0
+      ) {
         base.totalCommitContributions = commitData.total_count;
         base.isLive = true;
       }
     }
   } catch (err) {
-    console.warn("Public GitHub REST API fetch failed, serving snapshot:", err);
+    console.warn(
+      "Public GitHub REST API fetch failed, serving snapshot:",
+      err
+    );
   }
 
   return base;

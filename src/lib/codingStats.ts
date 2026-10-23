@@ -1,14 +1,11 @@
 import { profile } from "@/data/profile";
-import fs from "fs";
-import path from "path";
 
 export interface DailyActivity {
-  date: string; // YYYY-MM-DD
+  date: string;
   count: number;
   platforms: {
     leetcode?: number;
     codechef?: number;
-    hackerrank?: number;
   };
 }
 
@@ -30,10 +27,11 @@ export interface UnifiedCodingStats {
       rating: number;
       username: string;
     };
-    hackerrank: {
-      solved: number;
-      username: string;
-    };
+  };
+  /** Which platforms returned live data and which failed. */
+  sources: {
+    leetcode: "live" | "failed";
+    codechef: "live" | "failed";
   };
   dailyActivity: Record<string, DailyActivity>;
   weeks: {
@@ -48,40 +46,167 @@ export interface UnifiedCodingStats {
   lastUpdated: string;
 }
 
-const SNAPSHOT_PATH = path.join(
-  process.cwd(),
-  "src/data/coding-platforms-snapshot.json"
-);
+type LeetCodeResult = {
+  solved: number;
+  easy: number;
+  medium: number;
+  hard: number;
+  calendar: Record<string, number>;
+};
 
-function readSnapshot(): UnifiedCodingStats | null {
-  try {
-    if (fs.existsSync(SNAPSHOT_PATH)) {
-      const raw = fs.readFileSync(SNAPSHOT_PATH, "utf-8");
-      const parsed = JSON.parse(raw);
-      return { ...parsed, isLive: false };
-    }
-  } catch (err) {
-    console.error("Failed to read coding stats snapshot:", err);
+type CodeChefResult = {
+  solved: number;
+  rating: number;
+  calendar: Record<string, number>;
+};
+
+const REVALIDATE_SECONDS = 3600;
+const FETCH_TIMEOUT_MS = 8000;
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function asNonNegativeNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value) && value >= 0) {
+    return value;
+  }
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed) && parsed >= 0) return parsed;
   }
   return null;
 }
 
-function writeSnapshot(stats: UnifiedCodingStats) {
-  try {
-    fs.writeFileSync(SNAPSHOT_PATH, JSON.stringify(stats, null, 2), "utf-8");
-  } catch (err) {
-    console.error("Failed to write coding stats snapshot:", err);
+function dateKey(value: unknown): string | null {
+  if (typeof value !== "string" && typeof value !== "number") return null;
+
+  // Already YYYY-MM-DD
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
   }
+
+  // CodeChef uses YYYY-M-D (no zero-padding)
+  if (typeof value === "string" && /^\d{4}-\d{1,2}-\d{1,2}$/.test(value)) {
+    const [y, m, d] = value.split("-");
+    return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toISOString().slice(0, 10);
 }
 
-async function fetchLeetCode(username: string) {
+/**
+ * Normalize whatever a platform returns for its activity calendar into
+ * { "YYYY-MM-DD": count } records.
+ *
+ * Handles:
+ * - JSON-encoded strings (LeetCode `submissionCalendar`)
+ * - Objects keyed by Unix timestamps in seconds (LeetCode)
+ * - Arrays of { date, value } objects (CodeChef `userDailySubmissionsStats`)
+ * - Plain { "YYYY-MM-DD": count } objects
+ */
+function normalizeCalendar(value: unknown): Record<string, number> {
+  const calendar: Record<string, number> = {};
+
+  const add = (dateValue: unknown, countValue: unknown) => {
+    const key = dateKey(dateValue);
+    const count = asNonNegativeNumber(countValue);
+    if (!key || count === null || count === 0) return;
+    calendar[key] = (calendar[key] ?? 0) + count;
+  };
+
+  // JSON string (LeetCode submissionCalendar)
+  if (typeof value === "string") {
+    try {
+      return normalizeCalendar(JSON.parse(value));
+    } catch {
+      return calendar;
+    }
+  }
+
+  // Array of { date, value } (CodeChef) or { date, count } etc.
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      if (!item || typeof item !== "object") continue;
+      const rec = item as Record<string, unknown>;
+      const dateVal = rec.date ?? rec.timestamp ?? rec.day;
+      const countVal = rec.value ?? rec.count ?? rec.submissions ?? rec.total;
+      if (typeof dateVal === "number" && dateVal > 1_000_000_000) {
+        add(new Date(dateVal * 1000).toISOString().slice(0, 10), countVal);
+      } else {
+        add(dateVal, countVal);
+      }
+    }
+    return calendar;
+  }
+
+  // Plain object — keys may be Unix timestamps (LeetCode) or date strings
+  if (value && typeof value === "object") {
+    for (const [key, countValue] of Object.entries(
+      value as Record<string, unknown>
+    )) {
+      if (/^\d{10}$/.test(key)) {
+        // Unix timestamp in seconds
+        add(
+          new Date(Number(key) * 1000).toISOString().slice(0, 10),
+          countValue
+        );
+      } else {
+        add(key, countValue);
+      }
+    }
+  }
+
+  return calendar;
+}
+
+function fetchWithTimeout(
+  url: string,
+  init: RequestInit & { next?: { revalidate: number } }
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  return fetch(url, { ...init, signal: controller.signal }).finally(() =>
+    clearTimeout(timer)
+  );
+}
+
+function getIntensity(count: number): 0 | 1 | 2 | 3 | 4 {
+  if (count <= 0) return 0;
+  if (count <= 1) return 1;
+  if (count <= 3) return 2;
+  if (count <= 6) return 3;
+  return 4;
+}
+
+function getDateString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+// ---------------------------------------------------------------------------
+// LeetCode — public GraphQL API
+//
+// Endpoint : https://leetcode.com/graphql
+// Fields   : solved counts by difficulty, submissionCalendar (Unix ts → count)
+// Range    : last ~12 months of calendar data
+// ---------------------------------------------------------------------------
+
+async function fetchLeetCode(
+  username: string
+): Promise<LeetCodeResult | null> {
   try {
-    const res = await fetch("https://leetcode.com/graphql", {
+    const response = await fetchWithTimeout("https://leetcode.com/graphql", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Referer: "https://leetcode.com",
-        "User-Agent": "Mozilla/5.0",
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       },
       body: JSON.stringify({
         query: `
@@ -91,7 +216,6 @@ async function fetchLeetCode(username: string) {
                 acSubmissionNum {
                   difficulty
                   count
-                  submissions
                 }
               }
               submissionCalendar
@@ -100,225 +224,273 @@ async function fetchLeetCode(username: string) {
         `,
         variables: { username },
       }),
-      next: { revalidate: 3600 },
+      next: { revalidate: REVALIDATE_SECONDS },
     });
 
-    if (!res.ok) return null;
-    const json = await res.json();
+    if (!response.ok) return null;
+
+    const json = await response.json();
     const matched = json?.data?.matchedUser;
     if (!matched) return null;
 
-    interface LeetCodeStat {
-      difficulty: string;
-      count: number;
-    }
-    const stats: LeetCodeStat[] = matched.submitStats?.acSubmissionNum || [];
-    const all = stats.find((s) => s.difficulty === "All")?.count || 0;
-    const easy = stats.find((s) => s.difficulty === "Easy")?.count || 0;
-    const medium = stats.find((s) => s.difficulty === "Medium")?.count || 0;
-    const hard = stats.find((s) => s.difficulty === "Hard")?.count || 0;
+    const stats = matched.submitStats?.acSubmissionNum ?? [];
 
-    let calendar: Record<string, number> = {};
-    if (matched.submissionCalendar) {
-      try {
-        calendar = JSON.parse(matched.submissionCalendar);
-      } catch {
-        calendar = {};
-      }
-    }
+    const getCount = (difficulty: string) =>
+      asNonNegativeNumber(
+        stats.find(
+          (item: { difficulty: string; count: number }) =>
+            item.difficulty === difficulty
+        )?.count
+      ) ?? 0;
 
     return {
-      solved: all,
-      easy,
-      medium,
-      hard,
-      calendar,
+      solved: getCount("All"),
+      easy: getCount("Easy"),
+      medium: getCount("Medium"),
+      hard: getCount("Hard"),
+      calendar: normalizeCalendar(matched.submissionCalendar),
     };
-  } catch (e) {
-    console.error("LeetCode fetch error:", e);
+  } catch (error) {
+    console.error("Failed to fetch LeetCode stats:", error);
     return null;
   }
 }
 
-async function fetchCodeChef(username: string) {
+// ---------------------------------------------------------------------------
+// CodeChef — HTML scrape of www.codechef.com/users/<username>
+//
+// Available data:
+//   Rating   — Drupal.settings JSON → date_versus_rating.all[last].rating
+//   Solved   — "Total Problems Solved: N" heading in page HTML
+//   Heatmap  — userDailySubmissionsStats JS variable
+//              Format : [{ date: "YYYY-M-D", value: N }, ...]
+//              Range  : all recorded activity since account creation (sparse)
+//
+// The third-party API (codechef-api.vercel.app) is on a paid/disabled plan.
+// We scrape the official page directly — no authentication required.
+// ---------------------------------------------------------------------------
+
+async function fetchCodeChef(
+  username: string
+): Promise<CodeChefResult | null> {
   try {
-    const res = await fetch(`https://www.codechef.com/users/${username}`, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-      },
-      next: { revalidate: 3600 },
-    });
-
-    if (!res.ok) return null;
-    const html = await res.text();
-
-    const solvedMatch = html.match(/Total Problems Solved:\s*(\d+)/i);
-    const solved = solvedMatch ? parseInt(solvedMatch[1], 10) : 217;
-
-    const ratingMatch = html.match(
-      /<a href=['"]https:\/\/www\.codechef\.com\/ratings\/all['"] class=['"]rating['"]>(\d+)/i
-    );
-    const rating = ratingMatch ? parseInt(ratingMatch[1], 10) : 1223;
-
-    return { solved, rating };
-  } catch (e) {
-    console.error("CodeChef fetch error:", e);
-    return null;
-  }
-}
-
-async function fetchHackerRank(username: string) {
-  try {
-    const res = await fetch(
-      `https://www.hackerrank.com/rest/hackers/${username}/scores_elo`,
+    const response = await fetchWithTimeout(
+      `https://www.codechef.com/users/${encodeURIComponent(username)}`,
       {
         headers: {
-          "User-Agent": "Mozilla/5.0",
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          Accept:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.5",
         },
-        next: { revalidate: 3600 },
+        next: { revalidate: REVALIDATE_SECONDS },
       }
     );
 
-    if (!res.ok) return null;
-    const json = await res.json();
-    let solved = 0;
-    if (Array.isArray(json)) {
-      for (const item of json) {
-        const score = item?.practice?.score || 0;
-        if (score > 0) {
-          solved += Math.max(1, Math.round(score / 10));
+    if (!response.ok) return null;
+
+    const html = await response.text();
+
+    // 1. Rating — last entry in date_versus_rating array inside Drupal.settings
+    let rating = 0;
+    const settingsMatch = html.match(
+      /jQuery\.extend\(Drupal\.settings,\s*(\{[\s\S]*?\})\s*\);/
+    );
+    if (settingsMatch) {
+      try {
+        const settings = JSON.parse(settingsMatch[1]) as Record<
+          string,
+          unknown
+        >;
+        const allContests = (
+          settings.date_versus_rating as {
+            all?: { rating?: string | number }[];
+          }
+        )?.all;
+        if (Array.isArray(allContests) && allContests.length > 0) {
+          const raw = allContests[allContests.length - 1]?.rating;
+          rating = asNonNegativeNumber(raw) ?? 0;
         }
+      } catch {
+        // Parse failure — keep rating = 0
       }
     }
-    return { solved: solved || 28 };
-  } catch (e) {
-    console.error("HackerRank fetch error:", e);
+
+    // 2. Solved count — "Total Problems Solved: N" heading
+    let solved = 0;
+    const solvedMatch = html.match(/Total Problems Solved:\s*(\d+)/i);
+    if (solvedMatch) {
+      solved = parseInt(solvedMatch[1], 10);
+    }
+
+    // 3. Heatmap — userDailySubmissionsStats JS variable
+    //    Format: [{ date: "YYYY-M-D", value: N }, ...]
+    let calendar: Record<string, number> = {};
+    const heatmapMatch = html.match(
+      /userDailySubmissionsStats\s*=\s*(\[[\s\S]*?\]);/
+    );
+    if (heatmapMatch) {
+      try {
+        const raw = JSON.parse(heatmapMatch[1]) as unknown;
+        calendar = normalizeCalendar(raw);
+      } catch {
+        // Keep calendar empty on parse error
+      }
+    }
+
+    // Treat as failed if we couldn't extract any meaningful data
+    if (solved === 0 && rating === 0 && Object.keys(calendar).length === 0) {
+      return null;
+    }
+
+    return { solved, rating, calendar };
+  } catch (error) {
+    console.error("Failed to fetch CodeChef stats:", error);
     return null;
   }
 }
 
+// ---------------------------------------------------------------------------
+// Unified stats aggregation
+// ---------------------------------------------------------------------------
+
 export async function getUnifiedCodingStats(): Promise<UnifiedCodingStats> {
-  const [lc, cc, hr] = await Promise.all([
+  const [leetcode, codechef] = await Promise.all([
     fetchLeetCode(profile.leetcodeUsername),
     fetchCodeChef(profile.codechefUsername),
-    fetchHackerRank(profile.hackerrankUsername),
   ]);
 
-  if (!lc && !cc && !hr) {
-    const snapshot = readSnapshot();
-    if (snapshot) return snapshot;
-  }
-
-  const lcSolved = lc?.solved ?? 226;
-  const ccSolved = cc?.solved ?? 217;
-  const hrSolved = hr?.solved ?? 28;
-  const totalSolved = lcSolved + ccSolved + hrSolved;
-
-  // Aggregate daily activity for past 365 days
+  // Build per-day merged activity map
   const dailyActivity: Record<string, DailyActivity> = {};
 
-  if (lc?.calendar) {
-    for (const [timestampStr, count] of Object.entries(lc.calendar)) {
-      const ts = parseInt(timestampStr, 10) * 1000;
-      const dateStr = new Date(ts).toISOString().split("T")[0];
-      if (!dailyActivity[dateStr]) {
-        dailyActivity[dateStr] = {
-          date: dateStr,
-          count: 0,
-          platforms: {},
-        };
+  const mergeCalendar = (
+    calendar: Record<string, number>,
+    platform: "leetcode" | "codechef"
+  ) => {
+    for (const [date, count] of Object.entries(calendar)) {
+      if (!dailyActivity[date]) {
+        dailyActivity[date] = { date, count: 0, platforms: {} };
       }
-      dailyActivity[dateStr].count += count;
-      dailyActivity[dateStr].platforms.leetcode =
-        (dailyActivity[dateStr].platforms.leetcode || 0) + count;
+      dailyActivity[date].count += count;
+      dailyActivity[date].platforms[platform] =
+        (dailyActivity[date].platforms[platform] ?? 0) + count;
     }
-  }
+  };
 
-  // Calculate 52 weeks of dates up to today
+  if (leetcode) mergeCalendar(leetcode.calendar, "leetcode");
+  if (codechef) mergeCalendar(codechef.calendar, "codechef");
+
+  // Generate calendar weeks from Jan 1 2024 through the Saturday of the current week.
+  // This covers all LeetCode and CodeChef data available for this profile.
   const today = new Date();
-  const dayOfWeek = today.getDay(); // 0 is Sunday
-  const daysToInclude = 52 * 7 + (dayOfWeek + 1);
+  today.setHours(0, 0, 0, 0);
 
-  const startDate = new Date(today);
-  startDate.setDate(today.getDate() - daysToInclude + 1);
+  const endDate = new Date(today);
+  endDate.setDate(endDate.getDate() + (6 - endDate.getDay())); // advance to Saturday
 
-  let activeDays = 0;
-  let currentStreak = 0;
-  let longestStreak = 0;
-  let tempStreak = 0;
+  // Start from the Sunday on or before Jan 1 2024
+  const startDate = new Date(2024, 0, 1); // Jan 1 2024
+  startDate.setDate(startDate.getDate() - startDate.getDay()); // rewind to Sunday
 
   const weeks: UnifiedCodingStats["weeks"] = [];
-  let currentWeekDays: UnifiedCodingStats["weeks"][0]["days"] = [];
+  let activeDays = 0;
+  let longestStreak = 0;
+  let currentStreak = 0;
+  let runningStreak = 0;
 
-  for (let i = 0; i < daysToInclude; i++) {
-    const curr = new Date(startDate);
-    curr.setDate(startDate.getDate() + i);
-    const dateStr = curr.toISOString().split("T")[0];
+  const cursor = new Date(startDate);
 
-    const act = dailyActivity[dateStr];
-    const count = act?.count || 0;
+  while (cursor <= endDate) {
+    const weekDays: UnifiedCodingStats["weeks"][number]["days"] = [];
 
-    let intensity: 0 | 1 | 2 | 3 | 4 = 0;
-    if (count > 0) {
-      activeDays++;
-      tempStreak++;
-      if (tempStreak > longestStreak) longestStreak = tempStreak;
-      if (count === 1) intensity = 1;
-      else if (count <= 3) intensity = 2;
-      else if (count <= 6) intensity = 3;
-      else intensity = 4;
-    } else {
-      tempStreak = 0;
+    for (let day = 0; day < 7; day++) {
+      const date = getDateString(cursor);
+      const activity = dailyActivity[date];
+      const count = activity?.count ?? 0;
+
+      if (cursor <= today) {
+        if (count > 0) {
+          activeDays++;
+          runningStreak++;
+          longestStreak = Math.max(longestStreak, runningStreak);
+        } else {
+          runningStreak = 0;
+        }
+      }
+
+      const platformParts = [
+        activity?.platforms.leetcode
+          ? `LeetCode: ${activity.platforms.leetcode}`
+          : null,
+        activity?.platforms.codechef
+          ? `CodeChef: ${activity.platforms.codechef}`
+          : null,
+      ].filter(Boolean);
+
+      weekDays.push({
+        date,
+        count,
+        intensity: getIntensity(count),
+        tooltip: `${date}: ${count} submission${count === 1 ? "" : "s"}${
+          platformParts.length ? ` (${platformParts.join(", ")})` : ""
+        }`,
+      });
+
+      cursor.setDate(cursor.getDate() + 1);
     }
 
-    const tooltip = `${dateStr}: ${count} submission${count === 1 ? "" : "s"} across LeetCode / CodeChef`;
+    weeks.push({ days: weekDays });
+  }
 
-    currentWeekDays.push({
-      date: dateStr,
-      count,
-      intensity,
-      tooltip,
-    });
+  // Current streak — count backwards from today (or yesterday if today is inactive)
+  const todayKey = getDateString(today);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayKey = getDateString(yesterday);
 
-    if (currentWeekDays.length === 7 || i === daysToInclude - 1) {
-      weeks.push({ days: currentWeekDays });
-      currentWeekDays = [];
+  const hasActivityToday = (dailyActivity[todayKey]?.count ?? 0) > 0;
+  const hasActivityYesterday = (dailyActivity[yesterdayKey]?.count ?? 0) > 0;
+
+  if (hasActivityToday || hasActivityYesterday) {
+    const streakCursor = new Date(hasActivityToday ? today : yesterday);
+    while ((dailyActivity[getDateString(streakCursor)]?.count ?? 0) > 0) {
+      currentStreak++;
+      streakCursor.setDate(streakCursor.getDate() - 1);
     }
   }
 
-  // Check recent streak
-  currentStreak = tempStreak;
+  const leetcodeSolved = leetcode?.solved ?? 0;
+  const codechefSolved = codechef?.solved ?? 0;
 
-  const result: UnifiedCodingStats = {
-    totalSolved,
-    activeDays: activeDays || 148,
-    longestStreak: longestStreak || 26,
-    currentStreak: currentStreak || 4,
+  return {
+    // totalSolved sums unique-platform counts. LeetCode and CodeChef have
+    // separate problem sets so there is no double-counting between them.
+    totalSolved: leetcodeSolved + codechefSolved,
+    activeDays,
+    longestStreak,
+    currentStreak,
     platforms: {
       leetcode: {
-        solved: lcSolved,
-        easy: lc?.easy ?? 138,
-        medium: lc?.medium ?? 79,
-        hard: lc?.hard ?? 9,
+        solved: leetcodeSolved,
+        easy: leetcode?.easy ?? 0,
+        medium: leetcode?.medium ?? 0,
+        hard: leetcode?.hard ?? 0,
         username: profile.leetcodeUsername,
       },
       codechef: {
-        solved: ccSolved,
-        rating: cc?.rating ?? 1223,
+        solved: codechefSolved,
+        rating: codechef?.rating ?? 0,
         username: profile.codechefUsername,
       },
-      hackerrank: {
-        solved: hrSolved,
-        username: profile.hackerrankUsername,
-      },
+    },
+    sources: {
+      leetcode: leetcode ? "live" : "failed",
+      codechef: codechef ? "live" : "failed",
     },
     dailyActivity,
     weeks,
-    isLive: Boolean(lc || cc),
+    isLive: Boolean(leetcode || codechef),
     lastUpdated: new Date().toISOString(),
   };
-
-  writeSnapshot(result);
-  return result;
 }
