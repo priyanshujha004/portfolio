@@ -56,7 +56,7 @@ export const experienceList: ExperienceItem[] = [
       "Working across backend services, database operations, admin dashboard, and web to implement features, maintain APIs, and ensure consistent data flow across platforms."
     ],
     technologies: ["NodeJS", "ExpressJS", "MongoDB", "EJS", "Redis", "BullMQ", "Docker"],
-    link: `https://www.linkedin.com/in/${profile.linkedinUsername}/`,
+    link: linkedInUrl,
   },
   {
     period: "June'25 - December'25",
@@ -70,6 +70,6 @@ export const experienceList: ExperienceItem[] = [
       "Evaluated multiple machine learning models and identified Random Forest as the strongest predictor, reducing forecast error by 4× relative to Linear Regression while achieving 95.3% accuracy in sales-week classification."
     ],
     technologies: ["Python", "Pandas", "Numpy", "Matplotlib"],
-    link: `https://www.linkedin.com/in/${profile.linkedinUsername}/`,
+    link: linkedInUrl,
   },
 ];
