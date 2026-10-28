@@ -23,7 +23,7 @@ export interface EducationItem {
   link?: string;
 }
 
-export const linkedInUrl = `https://www.linkedin.com/in/${profile.linkedinUsername}/`;
+export const linkedInUrl = `https://www.linkedin.com/in/priyanshujha971/`;
 
 export const educationList: EducationItem[] = [
   {
