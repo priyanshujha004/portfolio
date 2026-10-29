@@ -229,7 +229,16 @@ export function DeveloperActivitySection({ stats }: Props) {
                       )}
                     </div>
                     <div className="flex flex-col gap-[2px]">
-                      {week.days.map((day, dayIndex) => {
+                      {week.days.filter((day) => {
+                        const today = new Date();
+                        const currentDate = new Date(
+                          today.getFullYear(),
+                          today.getMonth(),
+                          today.getDate()
+                        );
+                        const dayDate = new Date(`${day.date}T00:00:00`);
+                        return dayDate <= currentDate;
+                      }).map((day, dayIndex) => {
                         let background = "bg-[#161B22]";
 
                         if (day.intensity === 1) {
