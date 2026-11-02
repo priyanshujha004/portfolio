@@ -6,7 +6,7 @@ import path from "path";
 
 export const metadata = {
   title: "Resume",
-  description: `Official resume and technical qualifications of ${profile.name}.`,
+  description: `Official Resume and Technical Qualifications of ${profile.name}.`,
 };
 
 export default function ResumePage() {
@@ -83,14 +83,10 @@ export default function ResumePage() {
         <div className="bg-[#0A0A0A] border border-[#222222] rounded-lg p-8 text-center space-y-3">
           <FileText size={32} className="mx-auto text-[#737373]" />
           <h2 className="text-base font-semibold text-white">
-            Resume PDF Not Yet Attached
+            Guess What?
           </h2>
           <p className="text-sm text-[#A3A3A3] max-w-md mx-auto leading-relaxed">
-            Please place your actual PDF file in{" "}
-            <code className="text-white bg-[#141414] px-1.5 py-0.5 rounded font-mono text-xs">
-              /public/resume.pdf
-            </code>
-            . Once placed, it will automatically render here and open when visitors click Resume.
+            I'm not ready yet, will get back to you soon!
           </p>
         </div>
       )}
