@@ -14,7 +14,7 @@ export const profile: Profile = {
   graduationYear: "2027",
   collegeDuration: "2023–2027",
   githubUsername: "priyanshujha004",
-  linkedinUsername: "priyanshu971",
+  linkedinUsername: "priyanshujha971",
   leetcodeUsername: "priyanshujha07",
   codechefUsername: "priyanshu971",
   hackerrankUsername: "priyanshujha971",

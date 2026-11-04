@@ -123,7 +123,7 @@ export const profile = {
   name: "Priyanshu Jha",
   role: "Software Engineer",
   githubUsername: "priyanshujha004",
-  linkedinUsername: "priyanshu971",
+  linkedinUsername: "priyanshujha971",
   leetcodeUsername: "priyanshujha07",
   codechefUsername: "priyanshu971",
   hackerrankUsername: "priyanshujha971",
