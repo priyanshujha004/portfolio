@@ -38,11 +38,11 @@ export default function ResumePage() {
         </div>
 
         {resumeExists && (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
             <a
               href="/resume.pdf"
               download={`${profile.name.replace(/\s+/g, "_")}_Resume.pdf`}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#141414] border border-[#2A2A2A] text-xs font-medium text-white rounded hover:bg-[#1F1F1F] transition-colors"
+              className="flex-1 sm:flex-initial justify-center inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#141414] border border-[#2A2A2A] text-xs font-medium text-white rounded hover:bg-[#1F1F1F] transition-colors min-h-[38px]"
             >
               <Download size={13} />
               <span>Download PDF</span>
@@ -51,7 +51,7 @@ export default function ResumePage() {
               href="/resume.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white !text-black text-xs font-medium rounded hover:bg-[#E5E5E5] transition-colors"
+              className="flex-1 sm:flex-initial justify-center inline-flex items-center gap-1.5 px-3.5 py-2 bg-white !text-black text-xs font-medium rounded hover:bg-[#E5E5E5] transition-colors min-h-[38px]"
             >
               <ExternalLink size={13} />
               <span>Open In New Tab</span>
@@ -71,7 +71,7 @@ export default function ResumePage() {
             <span>PDF Document</span>
           </div>
 
-          <div className="w-full aspect-[1/1.3] rounded border border-[#1A1A1A] overflow-hidden bg-[#111111]">
+          <div className="w-full aspect-[1/1.3] sm:aspect-[1/1.4] min-h-[460px] sm:min-h-[640px] rounded border border-[#1A1A1A] overflow-hidden bg-[#111111]">
             <iframe
               src="/resume.pdf#view=FitH"
               title={`${profile.name} Resume`}
@@ -86,7 +86,7 @@ export default function ResumePage() {
             Guess What?
           </h2>
           <p className="text-sm text-[#A3A3A3] max-w-md mx-auto leading-relaxed">
-            I'm not ready yet, will get back to you soon!
+            I&apos;m not ready yet, will get back to you soon!
           </p>
         </div>
       )}

@@ -21,14 +21,14 @@ export function ExperienceEducationSection() {
             >
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1 mb-2">
                 <div>
-                  <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                    {exp.role}
+                  <h3 className="text-base font-semibold text-white flex flex-wrap items-center gap-2">
+                    <span>{exp.role}</span>
                     {exp.link && (
                       <a
                         href={exp.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#A3A3A3] hover:text-white transition-colors"
+                        className="text-[#A3A3A3] hover:text-white transition-colors p-1 -m-1 inline-flex items-center"
                         aria-label={`External link for ${exp.organization}`}
                       >
                         <ExternalLink size={13} />
@@ -46,7 +46,7 @@ export function ExperienceEducationSection() {
                   </div>
                 </div>
 
-                <div className="text-xs font-mono text-[#A3A3A3] sm:text-right">
+                <div className="text-xs font-mono text-[#A3A3A3] sm:text-right shrink-0">
                   <div>{exp.period}</div>
                   <div className="text-[#737373]">{exp.location}</div>
                 </div>
@@ -97,14 +97,16 @@ export function ExperienceEducationSection() {
             >
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-1 mb-2">
                 <div>
-                  <h3 className="text-base font-semibold text-white flex items-center gap-2">
-                    {edu.qualification} @ {edu.fieldOfStudy}
+                  <h3 className="text-base font-semibold text-white flex flex-wrap items-center gap-2">
+                    <span>
+                      {edu.qualification} @ {edu.fieldOfStudy}
+                    </span>
                     {edu.link && (
                       <a
                         href={edu.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#A3A3A3] hover:text-white transition-colors"
+                        className="text-[#A3A3A3] hover:text-white transition-colors p-1 -m-1 inline-flex items-center"
                         aria-label={`External link for ${edu.institution}`}
                       >
                         <ExternalLink size={13} />
@@ -121,7 +123,7 @@ export function ExperienceEducationSection() {
                   </div>
                 </div>
 
-                <div className="text-xs font-mono text-[#A3A3A3] sm:text-right">
+                <div className="text-xs font-mono text-[#A3A3A3] sm:text-right shrink-0">
                   <div>{edu.duration}</div>
                   <div className="text-[#737373]">{edu.collegeLocation}</div>
                 </div>

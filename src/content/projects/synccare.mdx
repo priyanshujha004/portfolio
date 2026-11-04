@@ -66,43 +66,7 @@ SyncCare is being developed in stages, with the initial machine learning workflo
 
 ### Technical Architecture & Data Flow
 
-The planned system consists of a shared application layer and specialized healthcare modules. The following diagram describes the intended architecture; it does not imply that every component has already been implemented.
-
-```text
-[ Patient / Doctor ]
-         |
-         v
-[ React Frontend ]
-         |
-         v
-[ Node.js + Express Backend ]
-         |
-         +----------------------+----------------------+
-         |                      |                      |
-         v                      v                      v
-[ Disease Prediction ]    [ Medical RAG ]      [ Prescription OCR ]
-[ Random Forest ]         [ NLP + Retrieval ] [ Image Processing ]
-         |                      |                      |
-         +----------------------+----------------------+
-                                |
-                                v
-                     [ Healthcare Workflows ]
-                     - Patient records
-                     - Appointments
-                     - Prescriptions
-                     - Reminders
-                                |
-                                v
-                       [ Prisma ORM ]
-                                |
-                                v
-                           [ MySQL ]
-
-[ Prescription Images ]
-         |
-         v
-[ Planned Cloudinary Storage ]
-```
+<SyncCareArchitecture />
 
 ### Disease Prediction Module
 

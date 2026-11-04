@@ -65,11 +65,11 @@ export default async function BlogPostPage({
 
       {/* Article Header */}
       <header className="space-y-3">
-        <h1 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-white tracking-tight break-words">
           {post.title}
         </h1>
 
-        <div className="flex items-center gap-4 text-xs text-[#A3A3A3] font-mono">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#A3A3A3] font-mono">
           <span className="flex items-center gap-1.5">
             <Calendar size={12} className="text-[#737373]" />
             <time dateTime={post.date}>
@@ -96,7 +96,8 @@ export default async function BlogPostPage({
               <span
                 key={tag}
                 className="text-xs font-mono px-2.5 py-0.5 rounded bg-[#141414] text-[#A3A3A3] border border-[#222222]"
-              >{tag}
+              >
+                {tag}
               </span>
             ))}
           </div>
@@ -123,52 +124,48 @@ export default async function BlogPostPage({
         <MDXRemote source={post.content} />
       </div>
 
-      {/* Previous & Next Article Card */}
-      {nextPost && (
-        <div className="pt-8 mt-12 border-t border-[#1F1F1F]">
-          <div className="text-xs font-mono text-[#737373] uppercase mb-2">
-            Next Post
-          </div>
-          <Link
-            href={`/blogs/${nextPost.slug}`}
-            className="flex items-center justify-between p-4 bg-[#0A0A0A] border border-[#222222] rounded-lg hover:border-[#374151] transition-colors group"
-          >
-            <div>
-              <h3 className="text-base font-semibold text-white group-hover:underline">
-                {nextPost.title}
-              </h3>
-              <p className="text-xs text-[#A3A3A3] mt-0.5 line-clamp-1">
-                {nextPost.excerpt}
-              </p>
-            </div>
-            <ArrowRight
-              size={16}
-              className="text-[#A3A3A3] group-hover:text-white group-hover:translate-x-1 transition-all"
-            />
-          </Link>
+      {/* Previous & Next Article Cards */}
+      {(previousPost || nextPost) && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full pt-8 mt-12 border-t border-[#1F1F1F]">
+          {previousPost ? (
+            <Link
+              href={`/blogs/${previousPost.slug}`}
+              className="flex items-center gap-3 p-3.5 bg-[#0A0A0A] border border-[#222222] rounded-lg hover:border-[#374151] transition-colors group w-full"
+            >
+              <ArrowLeft
+                size={16}
+                className="shrink-0 text-[#A3A3A3] group-hover:text-white group-hover:-translate-x-1 transition-all"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-[#A3A3A3]">Previous Post</p>
+                <h3 className="text-sm font-semibold text-white group-hover:underline truncate">
+                  {previousPost.title}
+                </h3>
+              </div>
+            </Link>
+          ) : (
+            <div className="hidden sm:block" />
+          )}
+
+          {nextPost && (
+            <Link
+              href={`/blogs/${nextPost.slug}`}
+              className="flex items-center justify-between gap-3 p-3.5 bg-[#0A0A0A] border border-[#222222] rounded-lg hover:border-[#374151] transition-colors group w-full sm:col-start-2"
+            >
+              <div className="min-w-0 flex-1 text-left sm:text-right">
+                <p className="text-xs text-[#A3A3A3]">Next Post</p>
+                <h3 className="text-sm font-semibold text-white group-hover:underline truncate">
+                  {nextPost.title}
+                </h3>
+              </div>
+              <ArrowRight
+                size={16}
+                className="shrink-0 text-[#A3A3A3] group-hover:text-white group-hover:translate-x-1 transition-all"
+              />
+            </Link>
+          )}
         </div>
       )}
-      {
-        previousPost && (
-          <Link
-            href={`/blogs/${previousPost.slug}`}
-            className="flex items-center justify-between p-4 bg-[#0A0A0A] border border-[#222222] rounded-lg hover:border-[#374151] transition-colors group"
-          >
-            <div>
-              <h3 className="text-base font-semibold text-white group-hover:underline">
-                {previousPost.title}
-              </h3>
-              <p className="text-xs text-[#A3A3A3] mt-0.5 line-clamp-1">
-                {previousPost.excerpt}
-              </p>
-            </div>
-            <ArrowLeft
-              size={16}
-              className="text-[#A3A3A3] group-hover:text-white group-hover:translate-x-1 transition-all"
-            />
-          </Link>
-        )
-      }
     </article>
   );
 }

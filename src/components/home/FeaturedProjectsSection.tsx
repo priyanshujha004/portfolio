@@ -17,9 +17,9 @@ export function FeaturedProjectsSection({ projects }: Props) {
         </h2>
         <Link
           href="/projects"
-          className="text-xs font-medium text-[#A3A3A3] hover:text-white transition-colors flex items-center gap-1 group"
+          className="text-xs font-medium text-[#A3A3A3] hover:text-white transition-colors flex items-center gap-1 group py-1"
         >
-          View All Projects
+          <span>View All Projects</span>
           <ArrowRight
             size={13}
             className="group-hover:translate-x-0.5 transition-transform"
@@ -50,7 +50,7 @@ export function FeaturedProjectsSection({ projects }: Props) {
                     priority={index < 2}
                     imageExists={project.imageExists}
                     className="object-contain group-hover:scale-[1.02] transition-transform duration-300"
-                    sizes="(max-width: 768px) 100vw, 360px"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 360px"
                   />
                   {/* Status Badge in corner */}
                   <div className="absolute top-2.5 right-2.5">
@@ -90,16 +90,16 @@ export function FeaturedProjectsSection({ projects }: Props) {
               </div>
 
               {/* Action Links */}
-              <div className="flex items-center gap-4 text-xs font-medium text-white pt-3 mt-2">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-white pt-3 mt-2">
                 {isLive && project.liveUrl && (
                   <a
                     href={project.liveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity"
+                    className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity py-1 min-h-[32px]"
                   >
                     <ExternalLink size={12} />
-                    Live Preview
+                    <span>Live Preview</span>
                   </a>
                 )}
                 {project.repoUrl && (
@@ -107,17 +107,17 @@ export function FeaturedProjectsSection({ projects }: Props) {
                     href={project.repoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity text-[#A3A3A3] hover:text-white"
+                    className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity text-[#A3A3A3] hover:text-white py-1 min-h-[32px]"
                   >
                     <GithubIcon size={12} />
-                    Repo Url
+                    <span>Repo Url</span>
                   </a>
                 )}
                 <Link
                   href={`/projects/${project.slug}`}
-                  className="inline-flex items-center gap-1 text-[#A3A3A3] hover:text-white ml-auto"
+                  className="inline-flex items-center gap-1 text-[#A3A3A3] hover:text-white ml-auto py-1 min-h-[32px]"
                 >
-                  Case Study
+                  <span>Case Study</span>
                 </Link>
               </div>
             </div>

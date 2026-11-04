@@ -16,9 +16,9 @@ export function FeaturedBlogsSection({ posts }: Props) {
         </h2>
         <Link
           href="/blogs"
-          className="text-xs font-medium text-[#A3A3A3] hover:text-white transition-colors flex items-center gap-1 group"
+          className="text-xs font-medium text-[#A3A3A3] hover:text-white transition-colors flex items-center gap-1 group py-1"
         >
-          View All Blogs
+          <span>View All Blogs</span>
           <ArrowRight
             size={13}
             className="group-hover:translate-x-0.5 transition-transform"
@@ -43,7 +43,7 @@ export function FeaturedBlogsSection({ posts }: Props) {
                     loading="eager"
                     priority={index < 2}
                     className="object-contain group-hover:scale-105 transition-transform duration-300"
-                    sizes="140px"
+                    sizes="(max-width: 640px) 100vw, 140px"
                   />
                 </div>
               )}
@@ -55,7 +55,7 @@ export function FeaturedBlogsSection({ posts }: Props) {
                 </h3>
 
                 {/* Date & Reading time */}
-                <div className="flex items-center gap-4 text-xs text-[#A3A3A3] font-mono">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#A3A3A3] font-mono">
                   <span className="flex items-center gap-1.5">
                     <Calendar size={12} className="text-[#737373]" />
                     <time dateTime={post.date}>

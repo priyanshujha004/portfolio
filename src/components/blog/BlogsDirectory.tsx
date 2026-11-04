@@ -40,7 +40,7 @@ export function BlogsDirectory({ initialPosts }: Props) {
             placeholder="Search posts..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-[#0A0A0A] border border-[#222222] rounded-md pl-9 pr-3 py-1.5 text-xs text-white placeholder-[#737373] focus:outline-none focus:border-white transition-colors"
+            className="w-full bg-[#0A0A0A] border border-[#222222] rounded-md pl-9 pr-3 py-2 sm:py-1.5 text-sm sm:text-xs text-white placeholder-[#737373] focus:outline-none focus:border-white transition-colors"
           />
         </div>
       </div>
@@ -65,7 +65,7 @@ export function BlogsDirectory({ initialPosts }: Props) {
                       loading="eager"
                       priority={index < 2}
                       className="object-contain group-hover:scale-[1.02] transition-transform duration-300"
-                      sizes="(max-width: 768px) 100vw, 360px"
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 360px"
                     />
                   </div>
                 )}
@@ -74,7 +74,7 @@ export function BlogsDirectory({ initialPosts }: Props) {
                   {post.title}
                 </h2>
 
-                <div className="flex items-center gap-4 text-xs text-[#A3A3A3] font-mono mt-1 mb-2">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#A3A3A3] font-mono mt-1 mb-2">
                   <span className="flex items-center gap-1.5">
                     <Calendar size={12} className="text-[#737373]" />
                     <time dateTime={post.date}>

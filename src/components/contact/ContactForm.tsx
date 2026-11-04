@@ -83,7 +83,7 @@ export function ContactForm() {
   };
 
   return (
-    <div className="bg-[#0A0A0A] border border-[#222222] rounded-lg p-6 sm:p-8">
+    <div className="bg-[#0A0A0A] border border-[#222222] rounded-lg p-5 sm:p-8">
       {status === "success" ? (
         <div className="py-8 text-center space-y-3">
           <div className="w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center mx-auto">
@@ -98,7 +98,7 @@ export function ContactForm() {
           <button
             type="button"
             onClick={() => setStatus("idle")}
-            className="mt-4 px-4 py-2 bg-transparent border border-[#374151] text-xs font-medium text-white rounded hover:bg-[#141414] transition-colors"
+            className="mt-4 px-4 py-2 bg-transparent border border-[#374151] text-xs font-medium text-white rounded hover:bg-[#141414] transition-colors min-h-[38px]"
           >
             Send Another Message
           </button>
@@ -144,7 +144,7 @@ export function ContactForm() {
                 }}
                 disabled={status === "submitting"}
                 className={`w-full bg-[#141414] border ${errors.name ? "border-red-500" : "border-[#2A2A2A]"
-                  } rounded px-3 py-2 text-sm text-white placeholder-[#555555] focus:outline-none focus:border-white transition-colors`}
+                  } rounded px-3 py-2 text-base sm:text-sm text-white placeholder-[#555555] focus:outline-none focus:border-white transition-colors`}
               />
               {errors.name && (
                 <p className="text-[11px] text-red-400 mt-1">{errors.name}</p>
@@ -169,7 +169,7 @@ export function ContactForm() {
                 }}
                 disabled={status === "submitting"}
                 className={`w-full bg-[#141414] border ${errors.email ? "border-red-500" : "border-[#2A2A2A]"
-                  } rounded px-3 py-2 text-sm text-white placeholder-[#555555] focus:outline-none focus:border-white transition-colors`}
+                  } rounded px-3 py-2 text-base sm:text-sm text-white placeholder-[#555555] focus:outline-none focus:border-white transition-colors`}
               />
               {errors.email && (
                 <p className="text-[11px] text-red-400 mt-1">{errors.email}</p>
@@ -195,7 +195,7 @@ export function ContactForm() {
               }}
               disabled={status === "submitting"}
               className={`w-full bg-[#141414] border ${errors.subject ? "border-red-500" : "border-[#2A2A2A]"
-                } rounded px-3 py-2 text-sm text-white placeholder-[#555555] focus:outline-none focus:border-white transition-colors`}
+                } rounded px-3 py-2 text-base sm:text-sm text-white placeholder-[#555555] focus:outline-none focus:border-white transition-colors`}
             />
             {errors.subject && (
               <p className="text-[11px] text-red-400 mt-1">{errors.subject}</p>
@@ -220,7 +220,7 @@ export function ContactForm() {
               }}
               disabled={status === "submitting"}
               className={`w-full bg-[#141414] border ${errors.message ? "border-red-500" : "border-[#2A2A2A]"
-                } rounded px-3 py-2 text-sm text-white placeholder-[#555555] focus:outline-none focus:border-white transition-colors resize-y`}
+                } rounded px-3 py-2 text-base sm:text-sm text-white placeholder-[#555555] focus:outline-none focus:border-white transition-colors resize-y`}
             />
             {errors.message && (
               <p className="text-[11px] text-red-400 mt-1">{errors.message}</p>
@@ -231,7 +231,7 @@ export function ContactForm() {
             <button
               type="submit"
               disabled={status === "submitting"}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white !text-black text-sm font-medium rounded hover:bg-[#E5E5E5] transition-colors disabled:opacity-50"
+              className="w-full sm:w-auto justify-center inline-flex items-center gap-2 px-5 py-2.5 bg-white !text-black text-sm font-medium rounded hover:bg-[#E5E5E5] transition-colors disabled:opacity-50 min-h-[44px]"
             >
               {status === "submitting" ? (
                 <>

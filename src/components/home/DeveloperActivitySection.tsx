@@ -53,22 +53,6 @@ function getMonthMarks(firstDates: string[]): MonthMark[] {
 }
 
 
-/**
- * Avoid displaying adjacent month labels too close together.
- * This is particularly helpful at December–January boundaries.
- */
-function shouldShowMonthLabel(
-  marks: MonthMark[],
-  index: number
-): boolean {
-  const current = marks[index];
-  const next = marks[index + 1];
-
-  if (!current) return false;
-  if (!next) return true;
-
-  return next.weekIndex - current.weekIndex >= 4;
-}
 
 interface Props {
   stats: CombinedStatsPayload;
@@ -166,12 +150,12 @@ export function DeveloperActivitySection({ stats }: Props) {
           </p>
         </div>
 
-        <div className="flex items-center gap-1 rounded border border-[#2A2A2A] bg-[#0A0A0A] p-0.5">
+        <div className="flex items-center gap-1 rounded border border-[#2A2A2A] bg-[#0A0A0A] p-0.5 w-full sm:w-auto">
           <button
             type="button"
             onClick={() => setActiveTab("coding")}
-            className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${activeTab === "coding"
-              ? "bg-white !text-black"
+            className={`flex-1 sm:flex-initial text-center rounded px-3 py-1.5 text-xs font-medium transition-colors min-h-[36px] flex items-center justify-center ${activeTab === "coding"
+              ? "bg-white !text-black font-semibold"
               : "text-[#A3A3A3] hover:text-white"
               }`}
           >
@@ -181,8 +165,8 @@ export function DeveloperActivitySection({ stats }: Props) {
           <button
             type="button"
             onClick={() => setActiveTab("github")}
-            className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${activeTab === "github"
-              ? "bg-white !text-black"
+            className={`flex-1 sm:flex-initial text-center rounded px-3 py-1.5 text-xs font-medium transition-colors min-h-[36px] flex items-center justify-center ${activeTab === "github"
+              ? "bg-white !text-black font-semibold"
               : "text-[#A3A3A3] hover:text-white"
               }`}
           >
@@ -194,8 +178,8 @@ export function DeveloperActivitySection({ stats }: Props) {
       <div className="rounded-lg border border-[#2A2A2A] bg-[#0A0A0A] p-4 sm:p-5">
         <div
           ref={scrollRef}
-          className="overflow-x-auto pb-2"
-          style={{ scrollbarWidth: "none" }}
+          className="overflow-x-auto pb-2 touch-pan-x"
+          style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
         >
           <div className="flex gap-[2px]">
             {activeTab === "coding"

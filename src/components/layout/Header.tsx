@@ -63,8 +63,9 @@ export function Header() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="text-[#A3A3A3] hover:text-white p-1"
+            className="text-[#A3A3A3] hover:text-white p-2.5 -mr-2 rounded-md transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Toggle navigation menu"
+            aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -73,7 +74,10 @@ export function Header() {
 
       {/* Mobile Nav Dropdown */}
       {mobileMenuOpen && (
-        <div className="sm:hidden mt-4 pt-4 border-t border-[#1F1F1F] flex flex-col gap-3">
+        <nav
+          aria-label="Mobile navigation"
+          className="sm:hidden mt-4 pt-3 pb-2 border-t border-[#1F1F1F] flex flex-col gap-1"
+        >
           {navItems.map((item) => {
             const isActive =
               item.href === "/"
@@ -88,7 +92,7 @@ export function Header() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-sm font-medium text-[#A3A3A3] hover:text-white transition-colors py-1"
+                  className="text-sm font-medium text-[#A3A3A3] hover:text-white hover:bg-[#141414] rounded px-3 py-2.5 min-h-[44px] flex items-center transition-colors"
                 >
                   {item.label}
                 </a>
@@ -100,16 +104,17 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`text-sm font-medium transition-colors py-1 ${isActive
-                  ? "text-white underline underline-offset-4 decoration-1"
-                  : "text-[#A3A3A3] hover:text-white"
-                  }`}
+                className={`text-sm font-medium rounded px-3 py-2.5 min-h-[44px] flex items-center transition-colors ${
+                  isActive
+                    ? "text-white bg-[#141414] font-semibold"
+                    : "text-[#A3A3A3] hover:text-white hover:bg-[#141414]"
+                }`}
               >
                 {item.label}
               </Link>
             );
           })}
-        </div>
+        </nav>
       )}
     </header>
   );

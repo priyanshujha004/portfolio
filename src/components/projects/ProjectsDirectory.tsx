@@ -42,7 +42,7 @@ export function ProjectsDirectory({ initialProjects }: Props) {
             placeholder="Search Projects..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-[#0A0A0A] border border-[#222222] rounded-md pl-9 pr-3 py-1.5 text-xs text-white placeholder-[#737373] focus:outline-none focus:border-white transition-colors"
+            className="w-full bg-[#0A0A0A] border border-[#222222] rounded-md pl-9 pr-3 py-2 sm:py-1.5 text-sm sm:text-xs text-white placeholder-[#737373] focus:outline-none focus:border-white transition-colors"
           />
         </div>
       </div>
@@ -74,7 +74,7 @@ export function ProjectsDirectory({ initialProjects }: Props) {
                       priority={index < 2}
                       imageExists={project.imageExists}
                       className="object-contain group-hover:scale-[1.02] transition-transform duration-300"
-                      sizes="(max-width: 768px) 100vw, 360px"
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 360px"
                     />
                     <div className="absolute top-2.5 right-2.5">
                       {isLive ? (
@@ -109,16 +109,16 @@ export function ProjectsDirectory({ initialProjects }: Props) {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-4 text-xs font-medium text-white pt-3 mt-2">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-white pt-3 mt-2">
                   {isLive && project.liveUrl && (
                     <a
                       href={project.liveUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity"
+                      className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity py-1 min-h-[32px]"
                     >
                       <ExternalLink size={12} />
-                      Live Preview
+                      <span>Live Preview</span>
                     </a>
                   )}
                   {project.repoUrl && (
@@ -126,17 +126,17 @@ export function ProjectsDirectory({ initialProjects }: Props) {
                       href={project.repoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity text-[#A3A3A3] hover:text-white"
+                      className="inline-flex items-center gap-1 hover:opacity-80 transition-opacity text-[#A3A3A3] hover:text-white py-1 min-h-[32px]"
                     >
                       <GithubIcon size={12} />
-                      Repo Url
+                      <span>Repo Url</span>
                     </a>
                   )}
                   <Link
                     href={`/projects/${project.slug}`}
-                    className="inline-flex items-center gap-1 text-[#A3A3A3] hover:text-white ml-auto"
+                    className="inline-flex items-center gap-1 text-[#A3A3A3] hover:text-white ml-auto py-1 min-h-[32px]"
                   >
-                    Case Study
+                    <span>Case Study</span>
                   </Link>
                 </div>
               </div>

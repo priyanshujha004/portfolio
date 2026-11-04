@@ -45,7 +45,7 @@ export default function ContactPage() {
                 href={s.href}
                 target={s.external ? "_blank" : undefined}
                 rel={s.external ? "noopener noreferrer" : undefined}
-                className="inline-flex items-center gap-1 px-3 py-1 bg-[#0A0A0A] border border-[#222222] rounded text-xs text-[#A3A3A3] hover:text-white hover:border-[#374151] transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-2 sm:py-1 bg-[#0A0A0A] border border-[#222222] rounded text-xs text-[#A3A3A3] hover:text-white hover:border-[#374151] transition-colors min-h-[36px]"
               >
                 <span>{s.label}</span>
                 {s.external && <ArrowUpRight size={11} />}

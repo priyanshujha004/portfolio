@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { Mail, ArrowRight } from "lucide-react";
-import { profile } from "@/data/profile";
 
 export function ContactPreviewSection() {
   return (
     <section className="py-8 border-t border-[#1F1F1F]">
-      <div className="bg-[#0A0A0A] border border-[#222222] rounded-lg p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="bg-[#0A0A0A] border border-[#222222] rounded-lg p-5 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Mail size={18} className="text-[#A3A3A3]" />
@@ -29,12 +28,12 @@ export function ContactPreviewSection() {
           </div> */}
         </div>
 
-        <div>
+        <div className="w-full sm:w-auto shrink-0">
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2 mt-5 px-5 py-2.5 bg-white !text-black text-sm font-medium rounded hover:bg-[#E5E5E5] transition-colors"
+            className="w-full sm:w-auto justify-center inline-flex items-center gap-2 px-5 py-2.5 bg-white !text-black text-sm font-medium rounded hover:bg-[#E5E5E5] transition-colors min-h-[44px]"
           >
-            Get In Touch
+            <span>Get In Touch</span>
             <ArrowRight size={14} />
           </Link>
         </div>
